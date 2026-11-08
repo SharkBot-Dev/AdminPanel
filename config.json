@@ -1,0 +1,9 @@
+{
+    "title": "テストのパネル",
+    "sidebar": [
+        {
+            "title": "ログアウト",
+            "link": "/api/auth/logout"
+        }
+    ]
+}

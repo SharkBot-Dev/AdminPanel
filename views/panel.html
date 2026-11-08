@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdminPanel</title>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh; /* または 100dvh (スマホのブラウザのアドレスバー等を考慮) */
+            width: 100vw;
+            overflow: hidden; /* 全体での二重スクロールを防ぐため */
+        }
+
+        .main-content {
+            flex: 2;             /* 幅の比率：メインを広く取る */
+            padding-left: 30px;
+        }
+
+        .sidebar {
+            flex: 0.5;             /* 幅の比率：サイドバーを狭く取る */
+            background-color: rgba(0, 0, 0, 0.5);
+            height: 100%;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            margin-left: 0px;
+            padding-left: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar a {
+            margin: 0 auto;
+            padding: 10px;
+            text-decoration: none;
+        }
+
+        .profile {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h2 id="title">..</h2>
+            <div class="profile" id="profile"></div>
+            <ul id="sidebar">
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <h2 id="title2"></h2>
+            <p>サイドバーから設定を開始できます。</p>
+        </main>
+    </div>
+
+    <script>
+        async function loadSetting() {
+            const res = await fetch("/api/panel/setting");
+            const json = await res.json();
+
+            if (json.title) {
+                document.getElementById("title").textContent = json.title;
+                document.getElementById("title2").textContent = json.title + "へようこそ！"
+            }
+
+            if (json.sidebar) {
+                const sidebarElem = document.getElementById("sidebar");
+                json.sidebar.forEach(sidebar => {
+                    const link = document.createElement("a");
+                    link.href = sidebar.link;
+                    link.textContent = sidebar.title;
+                    const li = document.createElement("li");
+                    link.appendChild(li);
+                    sidebarElem.appendChild(link)
+                });
+            }
+        }
+
+        async function loadUserInfo() {
+            const res = await fetch("/api/user/profile");
+            const json = await res.json();
+
+            const profile = document.getElementById("profile");
+            const username = document.createElement("span");
+            username.textContent = "「" + json.username + "」さんでログイン中";
+
+            profile.appendChild(username);
+        }
+
+        loadSetting();
+        loadUserInfo();
+    </script>
+</body>
+</html>
