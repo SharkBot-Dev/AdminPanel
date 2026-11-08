@@ -1,9 +1,11 @@
 import express from "express"
 import path from "path";
 import { fileURLToPath } from 'url';
+import fs from "fs";
 import cookieParser from "cookie-parser";
 import { getSession, getSessionNoLog, logoutSession, setSession } from "./sessions.js";
 import { loadSetting, setting } from "./settings.js";
+import { loadPlugin } from "./plugins.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,6 +17,17 @@ const port = Number(process.env.PORT);
 
 app.use(express.json());
 app.use(cookieParser());
+
+fs.readdirSync(path.join(__dirname, 'plugins')).forEach(async (file) => {
+    if (path.extname(file) === '.js') {
+        const filePath = path.join(path.join(__dirname, 'plugins'), file);
+        const module = await import(filePath);
+
+        await loadPlugin(module, app);
+        
+        console.log(`${file} プラグインを読み込みました。`, module);
+    }
+});
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../views', 'login.html'));
